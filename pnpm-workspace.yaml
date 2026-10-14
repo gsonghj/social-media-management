@@ -1,0 +1,10 @@
+packages: []
+
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+  msw: false
+
+peerDependencyRules:
+  allowedVersions:
+    eslint: "10"
