@@ -1,3 +1,10 @@
+import { PageHeader } from "@/components/page-header"
+
 export default function Page() {
-  return <div>Dashboard Page</div>
+  return (
+    <>
+      <PageHeader title="Dashboard" />
+      <div>Dashboard Page</div>
+    </>
+  )
 }

@@ -1,3 +1,10 @@
+import { PageHeader } from "@/components/page-header"
+
 export default function Page() {
-  return <div>Contacts Page</div>
+  return (
+    <>
+      <PageHeader title="Contacts" />
+      <div>Contacts Page</div>
+    </>
+  )
 }
