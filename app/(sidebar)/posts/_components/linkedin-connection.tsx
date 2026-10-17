@@ -1,6 +1,8 @@
 import { Link2 } from "lucide-react"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
+
+import { DisconnectButton } from "./disconnect-button"
 
 export function LinkedInConnection({
   account,
@@ -30,10 +32,7 @@ export function LinkedInConnection({
               : account.name}
           </p>
 
-          {/* TODO: 연결 해제 구현 */}
-          <Button type="submit" variant="outline" disabled>
-            연결 해제
-          </Button>
+          <DisconnectButton />
         </>
       ) : (
         <a href="/api/linkedin/connect" className={buttonVariants()}>
