@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { SESSION_COOKIE, SESSION_MAX_AGE } from "@/lib/constants"
+import { SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from "@/lib/constants"
 import { sign } from "@/lib/server/crypto"
 import { env } from "@/lib/server/env"
 
@@ -33,7 +33,7 @@ describe("세션 발급 테스트", () => {
       expect.objectContaining({
         httpOnly: true,
         sameSite: "lax",
-        maxAge: SESSION_MAX_AGE,
+        maxAge: SESSION_COOKIE_OPTIONS.maxAge,
         path: "/",
       })
     )
