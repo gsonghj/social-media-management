@@ -18,7 +18,7 @@ export type LinkedInAccountDoc = {
 }
 
 // 인덱스는 프로세스당 한 번만 생성한다. 실패하면 다음 호출에서 재시도한다.
-let indexesReady: Promise<string> | undefined
+let indexesReady: Promise<string[]> | undefined
 
 /** const accounts = await getAccounts() */
 export async function getAccounts() {
@@ -28,7 +28,10 @@ export async function getAccounts() {
 
   // 인덱스 생성
   indexesReady ??= collection
-    .createIndex({ userId: 1 }, { unique: true }) // 사용자당 계정 1개
+    .createIndexes([
+      { key: { userId: 1 }, unique: true }, // 사용자당 계정 1개
+      { key: { expiresAt: 1 }, expireAfterSeconds: 0 }, // 만료된 연결 삭제
+    ])
     .catch((error: unknown) => {
       indexesReady = undefined
       throw error
