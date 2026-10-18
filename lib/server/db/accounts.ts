@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb"
+import { cache } from "react"
 
 import { UserId } from "@/lib/users"
 
@@ -42,10 +43,10 @@ export async function getAccounts() {
 }
 
 /** 사용자의 LinkedIn 계정 연결을 조회한다. */
-export async function getAccountByUserId(userId: UserId) {
+export const getAccountByUserId = cache(async (userId: UserId) => {
   const accounts = await getAccounts()
   return accounts.findOne({ userId })
-}
+})
 
 /** 사용자의 LinkedIn 계정 연결을 저장한다. 이미 있으면 교체하고 _id는 유지한다. */
 export async function upsertAccount(account: Omit<LinkedInAccountDoc, "_id">) {

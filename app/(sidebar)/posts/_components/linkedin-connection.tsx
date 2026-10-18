@@ -17,7 +17,7 @@ export function LinkedInConnection({
 }) {
   return (
     <>
-      {!!account && account.expiresAt > new Date() ? (
+      {account ? (
         <>
           {/* <Avatar size="sm">
             <AvatarImage src={account.picture || undefined} alt="" />
