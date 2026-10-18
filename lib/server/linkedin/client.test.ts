@@ -40,7 +40,7 @@ describe("인증 URL 생성 테스트", () => {
       client_id: "client-id",
       redirect_uri: "http://localhost:3000/api/linkedin/callback",
       state: "signed-state",
-      scope: "openid profile email",
+      scope: "openid profile email w_member_social",
     })
   })
 })
@@ -130,6 +130,71 @@ describe("프로필 조회 테스트", () => {
       Response.json({ message: "expired" }, { status: 401 })
     )
     const error = await client.getProfile("access-token").catch((e) => e)
+
+    expect(error).toBeInstanceOf(LinkedInError)
+    expect(error.isUnauthorized).toBe(true)
+  })
+})
+
+describe("게시물 생성 테스트", () => {
+  const post = {
+    sub: "abc",
+    content: "첫 번째 게시물입니다. #FirstPost\n반가워요! @Hello",
+    visibility: "PUBLIC" as const,
+  }
+
+  it.each(["PUBLIC", "CONNECTIONS"] as const)(
+    "%s 공개 범위로 게시하고 응답 헤더의 게시물 ID를 반환한다",
+    async (visibility) => {
+      fetchMock.mockResolvedValue(
+        new Response(null, {
+          status: 201,
+          headers: { "x-restli-id": "urn:li:share:123" },
+        })
+      )
+
+      expect(
+        await client.createPost("access-token", { ...post, visibility })
+      ).toEqual({ postId: "urn:li:share:123" })
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        "https://api.linkedin.com/rest/posts",
+        expect.objectContaining({
+          method: "POST",
+          headers: {
+            Authorization: "Bearer access-token",
+            "Content-Type": "application/json",
+            "LinkedIn-Version": "202609",
+            "X-Restli-Protocol-Version": "2.0.0",
+          },
+          body: expect.any(String),
+        })
+      )
+      expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
+        author: "urn:li:person:abc",
+        commentary: "첫 번째 게시물입니다. \\#FirstPost\n반가워요! \\@Hello",
+        visibility,
+        distribution: {
+          feedDistribution: "MAIN_FEED",
+          targetEntities: [],
+          thirdPartyDistributionChannels: [],
+        },
+        lifecycleState: "PUBLISHED",
+        isReshareDisabledByAuthor: false,
+      })
+    }
+  )
+
+  it("201 응답에 게시물 ID가 없으면 에러를 던진다", async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 201 }))
+
+    await expect(client.createPost("access-token", post)).rejects.toThrow(Error)
+  })
+
+  it("401이면 재연결이 필요한 에러로 구분된다", async () => {
+    fetchMock.mockResolvedValue(
+      Response.json({ message: "expired" }, { status: 401 })
+    )
+    const error = await client.createPost("access-token", post).catch((e) => e)
 
     expect(error).toBeInstanceOf(LinkedInError)
     expect(error.isUnauthorized).toBe(true)

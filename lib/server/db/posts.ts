@@ -10,7 +10,7 @@ export type LinkedInPostDoc = {
   accountId: ObjectId
   postId: string
   content: string
-  visibility: "CONNECTIONS" | "PUBLIC"
+  visibility: "PUBLIC" | "CONNECTIONS"
   createdAt: Date
 }
 

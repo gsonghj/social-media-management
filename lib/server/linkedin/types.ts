@@ -1,6 +1,8 @@
 import { z } from "zod"
 
-export const SCOPE = "openid profile email"
+import type { LinkedInPostDoc } from "@/lib/server/db/posts"
+
+export const SCOPE = "openid profile email w_member_social"
 
 export const tokenSchema = z.object({
   access_token: z.string().min(1),
@@ -28,6 +30,12 @@ export type LinkedInProfile = {
   email?: string
 }
 
+export type LinkedInPostInput = {
+  sub: string
+  content: string
+  visibility: LinkedInPostDoc["visibility"]
+}
+
 export interface LinkedInClient {
   /** LinkedIn 인증 URL을 만든다. */
   buildAuthUrl(state: string): string
@@ -35,6 +43,11 @@ export interface LinkedInClient {
   exchangeCode(code: string): Promise<LinkedInToken>
   /** 액세스 토큰으로 연결된 회원의 프로필을 조회한다. */
   getProfile(accessToken: string): Promise<LinkedInProfile>
+  /** 텍스트 게시물을 생성하고 게시물 ID를 반환한다. */
+  createPost(
+    accessToken: string,
+    post: LinkedInPostInput
+  ): Promise<{ postId: string }>
 }
 
 /** LinkedIn API가 실패 응답을 돌려줬을 때 던진다. 토큰과 자격 증명은 담지 않는다. */

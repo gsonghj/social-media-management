@@ -57,4 +57,35 @@ export const client: LinkedInClient = {
       email: profile.email,
     }
   },
+
+  async createPost(accessToken, post) {
+    const response = await fetch(`${env.LINKEDIN_API_BASE_URL}/posts`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "LinkedIn-Version": env.LINKEDIN_API_VERSION,
+        "X-Restli-Protocol-Version": "2.0.0",
+      },
+      body: JSON.stringify({
+        author: `urn:li:person:${post.sub}`,
+        commentary: post.content.replace(/[|{}@[\]()<>#\\*_~]/g, "\\$&"),
+        visibility: post.visibility,
+        distribution: {
+          feedDistribution: "MAIN_FEED",
+          targetEntities: [],
+          thirdPartyDistributionChannels: [],
+        },
+        lifecycleState: "PUBLISHED",
+        isReshareDisabledByAuthor: false,
+      }),
+    })
+    if (!response.ok) throw new LinkedInError("게시물 생성", response.status)
+
+    const postId = response.headers.get("x-restli-id")
+    if (!postId)
+      throw new Error("[LinkedIn] 게시물 생성 응답에 게시물 ID가 없습니다.")
+
+    return { postId }
+  },
 }
